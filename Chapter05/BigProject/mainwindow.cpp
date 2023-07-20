@@ -3,13 +3,16 @@
 
 #include <QDateTime>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(TemperatureSensorIF *tempSensor, QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+    m_tempSensor(tempSensor)
 {
     ui->setupUi(this);
 
     ui->currentDateTime->setText(QDateTime::currentDateTime().toString());
+
+    connect(m_tempSensor, &TemperatureSensorIF::newTemperature, this, &MainWindow::updateTempDisplay);
 
     m_updateTimer.setSingleShot(false);
     connect(&m_updateTimer, &QTimer::timeout, this, &MainWindow::updateDisplay);
@@ -26,5 +29,10 @@ void MainWindow::updateDisplay()
 {
     QDateTime now = QDateTime::currentDateTime();
     ui->currentDateTime->setText(now.toString());
+}
+
+void MainWindow::updateTempDisplay(QDateTime timestamp, float temperature)
+{
+    ui->tempDisplay->setText(QString("%1°C").arg(temperature));
 }
 
